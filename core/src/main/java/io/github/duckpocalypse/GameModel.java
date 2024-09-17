@@ -18,7 +18,7 @@ public class GameModel {
         world.step(
             Constants.PhysicsConstants.TIME_STEP,
             Constants.PhysicsConstants.VELOCITY_ITERATIONS,
-            Constants.PhysicsConstants.POSITION_INTERATIONS
+            Constants.PhysicsConstants.POSITION_ITERATIONS
         );
     }
 }
