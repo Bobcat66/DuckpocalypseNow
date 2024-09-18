@@ -88,4 +88,6 @@ public class Main extends ApplicationAdapter {
 		cam.position.y = MathUtils.clamp(cam.position.y, effectiveViewportHeight / 2f, 100 - effectiveViewportHeight / 2f);
 	}
 
+    
+
 }
