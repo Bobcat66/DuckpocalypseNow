@@ -3,6 +3,7 @@ package io.github.duckpocalypse;
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
@@ -10,83 +11,84 @@ import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.utils.ScreenUtils;
+import com.badlogic.gdx.utils.viewport.FitViewport;
 
 /** {@link com.badlogic.gdx.ApplicationListener} implementation shared by all platforms. */
 public class Main extends ApplicationAdapter {
-    private SpriteBatch batch;
-    private Texture image;
+    private SpriteBatch spriteBatch;
+    private Texture backgroundImage;
     private Sprite mapSprite;
-    private OrthographicCamera cam;
+    private Texture playerTexture;
+    private Sprite playerSprite;
+    private FitViewport viewport;
 
     @Override
     public void create() {
-        image = new Texture("libgdx.png");
-        mapSprite = new Sprite(new Texture("Donald_Trump_mug_shot.jpg")); //Trump mugshot is a placeholder texture for the map
+        backgroundImage = new Texture("libgdx.png");
+        mapSprite = new Sprite(new Texture("grey.jpg"));
         mapSprite.setSize(
             Constants.WorldConstants.WORLD_WIDTH,
             Constants.WorldConstants.WORLD_HEIGHT
         );
+        playerTexture = new Texture("player.png");
+        playerSprite = new Sprite(playerTexture);
+        playerSprite.setSize(1, 1);
+        viewport = new FitViewport(Constants.WorldConstants.WORLD_WIDTH, Constants.WorldConstants.WORLD_HEIGHT);
 
-        float w = Gdx.graphics.getWidth();
-        float h = Gdx.graphics.getHeight();
-
-        cam = new OrthographicCamera(30,30 * (h/w));
-
-        cam.position.set(cam.viewportWidth / 2f, cam.viewportHeight / 2f, 0);
-		cam.update();
-
-        batch = new SpriteBatch();
+        spriteBatch = new SpriteBatch();
     }
 
     @Override
     public void render() {
-        ScreenUtils.clear(0.15f, 0.15f, 0.2f, 1f);
+        ScreenUtils.clear(Color.WHITE);
         handleInput();
-        cam.update();
-		batch.setProjectionMatrix(cam.combined);
+        viewport.apply();
+		spriteBatch.setProjectionMatrix(viewport.getCamera().combined);
 
-        Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
+        draw();
+    }
 
-        batch.begin();
-        mapSprite.draw(batch);
-        batch.end();
+    public void resize (int width, int height) {
+        viewport.update(width, height);
     }
 
     @Override
     public void dispose() {
-        batch.dispose();
-        image.dispose();
+        spriteBatch.dispose();
+        backgroundImage.dispose();
         mapSprite.getTexture().dispose();
     }
 
     private void handleInput() {
-		if (Gdx.input.isKeyPressed(Input.Keys.A)) {
-			cam.zoom += 0.02;
-		}
-		if (Gdx.input.isKeyPressed(Input.Keys.Q)) {
-			cam.zoom -= 0.02;
-		}
+        float speed = 4f;
+        float delta = Gdx.graphics.getDeltaTime();
+		
 		if (Gdx.input.isKeyPressed(Input.Keys.LEFT)) {
-			cam.translate(-3, 0, 0);
+            playerSprite.translateX(speed * delta);
 		}
 		if (Gdx.input.isKeyPressed(Input.Keys.RIGHT)) {
-			cam.translate(3, 0, 0);
+			playerSprite.translateX(-speed * delta);
 		}
 		if (Gdx.input.isKeyPressed(Input.Keys.DOWN)) {
-			cam.translate(0, -3, 0);
+			playerSprite.translateX(-speed * -delta);
 		}
 		if (Gdx.input.isKeyPressed(Input.Keys.UP)) {
-			cam.translate(0, 3, 0);
+			playerSprite.translateX(speed * -delta);
 		}
-
-		cam.zoom = MathUtils.clamp(cam.zoom, 0.1f, 100/cam.viewportWidth);
-
-		float effectiveViewportWidth = cam.viewportWidth * cam.zoom;
-		float effectiveViewportHeight = cam.viewportHeight * cam.zoom;
-
-		cam.position.x = MathUtils.clamp(cam.position.x, effectiveViewportWidth / 2f, 100 - effectiveViewportWidth / 2f);
-		cam.position.y = MathUtils.clamp(cam.position.y, effectiveViewportHeight / 2f, 100 - effectiveViewportHeight / 2f);
 	}
+
+     private void draw() {
+        ScreenUtils.clear(Color.BLACK);
+        viewport.apply();
+        spriteBatch.setProjectionMatrix(viewport.getCamera().combined);
+        spriteBatch.begin();
+
+        spriteBatch.draw(mapSprite, 0, 0, Constants.WorldConstants.WORLD_WIDTH, Constants.WorldConstants.WORLD_HEIGHT);
+        spriteBatch.draw(playerSprite, 0, 0, 1, 1);
+
+        spriteBatch.end();
+    }
+
 
     
 
