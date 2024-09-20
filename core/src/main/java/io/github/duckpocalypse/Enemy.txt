@@ -1,0 +1,103 @@
+public class Enemy {
+    private Vector2 position;
+    private float direction; // in radians
+    private float visionAngle; // in radians
+    private float visionDistance;
+
+    public Enemy(Vector2 position, float direction, float visionAngle, float visionDistance) {
+        this.position = position;
+        this.direction = direction;
+        this.visionAngle = visionAngle;
+        this.visionDistance = visionDistance;
+    }
+
+    // Getters and setters
+}
+
+public class VisionCone {
+    private Enemy enemy;
+
+    public VisionCone(Enemy enemy) {
+        this.enemy = enemy;
+    }
+
+    public Vector2[] getConeVertices() {
+        Vector2[] vertices = new Vector2[3];
+        vertices[0] = enemy.getPosition();
+
+        float leftAngle = enemy.getDirection() - enemy.getVisionAngle() / 2;
+        float rightAngle = enemy.getDirection() + enemy.getVisionAngle() / 2;
+
+        vertices[1] = new Vector2(
+            enemy.getPosition().x + enemy.getVisionDistance() * MathUtils.cos(leftAngle),
+            enemy.getPosition().y + enemy.getVisionDistance() * MathUtils.sin(leftAngle)
+        );
+
+        vertices[2] = new Vector2(
+            enemy.getPosition().x + enemy.getVisionDistance() * MathUtils.cos(rightAngle),
+            enemy.getPosition().y + enemy.getVisionDistance() * MathUtils.sin(rightAngle)
+        );
+
+        return vertices;
+    }
+}
+
+public boolean isPlayerInVisionCone(Player player) {
+    Vector2[] vertices = getConeVertices();
+    Polygon visionCone = new Polygon(new float[]{
+        vertices[0].x, vertices[0].y,
+        vertices[1].x, vertices[1].y,
+        vertices[2].x, vertices[2].y
+    });
+
+    return visionCone.contains(player.getPosition());
+}
+
+public class VisionConeRenderer {
+    private ShapeRenderer shapeRenderer;
+
+    public VisionConeRenderer() {
+        shapeRenderer = new ShapeRenderer();
+    }
+
+    public void render(VisionCone visionCone) {
+        Vector2[] vertices = visionCone.getConeVertices();
+
+        shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
+        shapeRenderer.setColor(1, 0, 0, 0.5f); // Red color with some transparency
+        shapeRenderer.triangle(
+            vertices[0].x, vertices[0].y,
+            vertices[1].x, vertices[1].y,
+            vertices[2].x, vertices[2].y
+        );
+        shapeRenderer.end();
+    }
+}
+
+public class GameScreen implements Screen {
+    private Enemy enemy;
+    private VisionCone visionCone;
+    private VisionConeRenderer visionConeRenderer;
+    private Player player;
+
+    @Override
+    public void show() {
+        enemy = new Enemy(new Vector2(100, 100), 0, MathUtils.PI / 4, 200);
+        visionCone = new VisionCone(enemy);
+        visionConeRenderer = new VisionConeRenderer();
+        player = new Player(new Vector2(150, 150));
+    }
+
+    @Override
+    public void render(float delta) {
+        Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
+
+        visionConeRenderer.render(visionCone);
+
+        if (visionCone.isPlayerInVisionCone(player)) {
+            // Player is in the vision cone
+        }
+    }
+
+    // Other required methods (resize, pause, resume, hide, dispose)
+}
