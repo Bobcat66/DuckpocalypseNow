@@ -18,9 +18,9 @@ public class BodyFactory {
         RUBBER(1f,0.9f,0.01f),
         STONE(7f,0.5f,0.3f);
 
-        private float density;
-        private float friction;
-        private float restitution;
+        private final float density;
+        private final float friction;
+        private final float restitution;
 
         material(float _density, float _friction, float _restitution){
             density = _density;
@@ -46,7 +46,7 @@ public class BodyFactory {
     private static BodyFactory thisInstance;
 		
 	private BodyFactory(World world){
-		this.world = world;
+		BodyFactory.world = world;
 	}
 
     public static BodyFactory getInstance(World world){
