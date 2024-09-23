@@ -4,9 +4,12 @@ import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.GL20;
+import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 
@@ -15,7 +18,7 @@ public class Main extends ApplicationAdapter {
     private SpriteBatch spriteBatch;
     private Texture backgroundImage;
     private Sprite mapSprite;
-    private Sprite playerSprite;
+    private Player player;
     private FitViewport viewport;
 
     @Override
@@ -26,8 +29,8 @@ public class Main extends ApplicationAdapter {
             Constants.WorldConstants.WORLD_WIDTH,
             Constants.WorldConstants.WORLD_HEIGHT
         );
-        playerSprite = new Sprite(new Texture("player.png"));
-        playerSprite.setSize(5, 5);
+        player = new Player();
+        player.setSize(5, 5);
         viewport = new FitViewport(Constants.WorldConstants.WORLD_WIDTH, Constants.WorldConstants.WORLD_HEIGHT);
 
         spriteBatch = new SpriteBatch();
@@ -52,24 +55,22 @@ public class Main extends ApplicationAdapter {
         spriteBatch.dispose();
         backgroundImage.dispose();
         mapSprite.getTexture().dispose();
-        playerSprite.getTexture().dispose();
+        player.getTexture().dispose();
     }
 
     private void handleInput() {
-        float speed = 4f;
-        float delta = Gdx.graphics.getDeltaTime();
-		
+        //player logic
 		if (Gdx.input.isKeyPressed(Input.Keys.LEFT)) {
-            playerSprite.translateX(-speed * delta);
+            player.move("left");
 		}
 		if (Gdx.input.isKeyPressed(Input.Keys.RIGHT)) {
-			playerSprite.translateX(speed * delta);
+			player.move("right");
 		}
 		if (Gdx.input.isKeyPressed(Input.Keys.DOWN)) {
-			playerSprite.translateY(-speed * delta);
+			player.move("up");
 		}
 		if (Gdx.input.isKeyPressed(Input.Keys.UP)) {
-			playerSprite.translateY(speed * delta);
+			player.move("down");
 		}
 	}
 
@@ -80,7 +81,7 @@ public class Main extends ApplicationAdapter {
         spriteBatch.begin();
 
         mapSprite.draw(spriteBatch);
-        playerSprite.draw(spriteBatch);
+        player.draw(spriteBatch);
 
         spriteBatch.end();
     }
