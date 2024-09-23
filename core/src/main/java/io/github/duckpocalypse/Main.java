@@ -20,6 +20,8 @@ public class Main extends ApplicationAdapter {
     private Sprite mapSprite;
     private Player player;
     private FitViewport viewport;
+    private VisionConeRenderer visionConeRenderer;
+    private Enemy enemy;
 
     @Override
     public void create() {
@@ -31,6 +33,9 @@ public class Main extends ApplicationAdapter {
         );
         player = new Player();
         player.setSize(5, 5);
+        enemy = new Enemy();
+        enemy.setSize(5, 5);
+        visionConeRenderer = new VisionConeRenderer();
         viewport = new FitViewport(Constants.WorldConstants.WORLD_WIDTH, Constants.WorldConstants.WORLD_HEIGHT);
 
         spriteBatch = new SpriteBatch();
@@ -39,6 +44,7 @@ public class Main extends ApplicationAdapter {
     @Override
     public void render() {
         ScreenUtils.clear(Color.WHITE);
+        visionConeRenderer.render(enemy);
         handleInput();
         viewport.apply();
 		spriteBatch.setProjectionMatrix(viewport.getCamera().combined);
@@ -82,6 +88,9 @@ public class Main extends ApplicationAdapter {
 
         mapSprite.draw(spriteBatch);
         player.draw(spriteBatch);
+        enemy.draw(spriteBatch);
+        visionConeRenderer.render();
+        
 
         spriteBatch.end();
     }
