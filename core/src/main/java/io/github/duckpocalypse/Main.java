@@ -89,9 +89,7 @@ public class Main extends ApplicationAdapter {
         mapSprite.draw(spriteBatch);
         player.draw(spriteBatch);
         enemy.draw(spriteBatch);
-        visionConeRenderer.render();
         
-
         spriteBatch.end();
     }
 
