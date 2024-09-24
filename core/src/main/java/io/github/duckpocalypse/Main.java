@@ -22,7 +22,6 @@ public class Main extends ApplicationAdapter {
     private Sprite mapSprite;
     private Player player;
     private OrthographicCamera camera;
-    private VisionConeRenderer visionConeRenderer;
     private Enemy enemy;
     private TiledMap map;
     private TiledMapTileLayer collisionLayer; 
@@ -45,8 +44,6 @@ public class Main extends ApplicationAdapter {
         float unitScale = 1 / 32f;
         renderer = new OrthogonalTiledMapRenderer(map, unitScale);
 
-        visionConeRenderer = new VisionConeRenderer();
-
         float w = Gdx.graphics.getWidth();
         float h = Gdx.graphics.getHeight();
 
@@ -62,7 +59,6 @@ public class Main extends ApplicationAdapter {
     @Override
     public void render() {
         ScreenUtils.clear(Color.WHITE);
-        visionConeRenderer.render(enemy);
         handleInput();
         camera.update();
         renderer.setView(camera);
@@ -73,6 +69,7 @@ public class Main extends ApplicationAdapter {
         spriteBatch.begin();
         player.draw(spriteBatch);
         enemy.draw(spriteBatch);
+        enemy.getVisionCone().draw(spriteBatch);
         spriteBatch.end();
     }
 
@@ -81,6 +78,8 @@ public class Main extends ApplicationAdapter {
         spriteBatch.dispose();
         backgroundImage.dispose();
         mapSprite.getTexture().dispose();
+        enemy.getTexture().dispose();
+        enemy.getVisionCone().getTexture().dispose();
         player.getTexture().dispose();
     }
 
@@ -137,6 +136,8 @@ public class Main extends ApplicationAdapter {
 
 		camera.position.x = MathUtils.clamp(camera.position.x, effectiveViewportWidth/2f, 60-effectiveViewportWidth/2f);
 		camera.position.y = MathUtils.clamp(camera.position.y, effectiveViewportHeight/2f, 40-effectiveViewportHeight/2f);
+
+        enemy.setVisionConePosition();
 	}
 
      private void draw() {

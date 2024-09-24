@@ -8,6 +8,7 @@ import com.badlogic.gdx.math.Polygon;
 public class Enemy extends Sprite{
     private float speed;
     private float delta;
+    private Sprite visionCone;
     private float visionAngle; // in radians
     private float visionDistance;
 
@@ -15,6 +16,10 @@ public class Enemy extends Sprite{
         super(new Texture("duck.png"));
         delta = 1/40f;
         speed = 4f;
+
+        visionCone = new Sprite(new Texture("visionCone.jpg"));
+        visionCone.setSize(3, 1);
+
         visionAngle = MathUtils.PI / 4; // 45 degrees
         visionDistance = 25f; // Example distance
     }
@@ -33,27 +38,15 @@ public class Enemy extends Sprite{
     }
 
     public boolean checkVisionCone(Player player) {
-        Polygon visionCone = getVisionCone();
-        return visionCone.contains(player.getX(), player.getY());
+        return false;
     }
-    
-    public Polygon getVisionCone() {
-        float x = getX();
-        float y = getY();
-        float direction = getRotation() * MathUtils.degreesToRadians;
 
-        float leftAngle = direction - visionAngle / 2;
-        float rightAngle = direction + visionAngle / 2;
+    public void setVisionConePosition() {
+        visionCone.setPosition(this.getX() + this.getWidth(), this.getY());
+    }
 
-        float[] vertices = new float[6];
-        vertices[0] = x;
-        vertices[1] = y;
-        vertices[2] = x + visionDistance * MathUtils.cos(leftAngle);
-        vertices[3] = y + visionDistance * MathUtils.sin(leftAngle);
-        vertices[4] = x + visionDistance * MathUtils.cos(rightAngle);
-        vertices[5] = y + visionDistance * MathUtils.sin(rightAngle);
-
-        return new Polygon(vertices);
+    public Sprite getVisionCone() {
+        return visionCone;
     }
 
 
