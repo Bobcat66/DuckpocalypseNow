@@ -8,7 +8,7 @@ public class Player extends Sprite{
     private static float delta;
 
     public Player() {
-        super(new Texture("Donald_Trump_mug_shot.jpg"));
+        super(new Texture("player.png"));
         setPosition(15,10);
         delta = 1/40f;
         speed = 4f;
