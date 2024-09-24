@@ -36,6 +36,7 @@ public class Enemy extends Sprite{
         Polygon visionCone = getVisionCone();
         return visionCone.contains(player.getX(), player.getY());
     }
+    
     public Polygon getVisionCone() {
         float x = getX();
         float y = getY();
