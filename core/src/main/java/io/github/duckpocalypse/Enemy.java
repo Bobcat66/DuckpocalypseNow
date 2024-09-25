@@ -2,14 +2,14 @@ package io.github.duckpocalypse;
 
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Sprite;
-import com.badlogic.gdx.math.MathUtils;
 
 public class Enemy extends Sprite{
     private float speed;
     private float delta;
     private Sprite visionCone;
+    boolean isHorizontal;
 
-    public Enemy() {
+    public Enemy(boolean isHorizontal) {
         super(new Texture("duck.png"));
         delta = 1/40f;
         speed = 4f;
@@ -17,17 +17,19 @@ public class Enemy extends Sprite{
         visionCone = new Sprite(new Texture("visionCone.jpg"));
         visionCone.setSize(3, 1);
 
+        this.isHorizontal = isHorizontal;
+        //if(!isHorizontal)
+            //visionCone.setRotation(90f);
     }
 
-    public void moveVertically()
+    public void move()
     {
-        this.translateY(speed * delta);
+        if(isHorizontal)
+            this.translateX(speed * delta);
+        else 
+            this.translateY(speed * delta);
     }
     
-    public void moveHorizontally()
-    {
-        this.translateX(speed * delta);
-    }
 
     public boolean checkCollision(Player player)
     {

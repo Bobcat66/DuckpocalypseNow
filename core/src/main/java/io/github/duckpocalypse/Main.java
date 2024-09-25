@@ -14,6 +14,7 @@ import com.badlogic.gdx.maps.tiled.TmxMapLoader;
 import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.utils.ScreenUtils;
+import java.util.ArrayList;
 
 /** {@link com.badlogic.gdx.ApplicationListener} implementation shared by all platforms. */
 public class Main extends ApplicationAdapter {
@@ -22,10 +23,11 @@ public class Main extends ApplicationAdapter {
     private Sprite mapSprite;
     private Player player;
     private OrthographicCamera camera;
-    private Enemy enemy;
+    private ArrayList<Enemy> enemyList;
     private TiledMap map;
     private TiledMapTileLayer collisionLayer; 
     private OrthogonalTiledMapRenderer renderer;
+    Sprite goal;
 
     @Override
     public void create() {
@@ -38,8 +40,12 @@ public class Main extends ApplicationAdapter {
         );
         player = new Player();
         player.setSize(1, 1);
-        enemy = new Enemy();
-        enemy.setSize(1, 1);
+
+        goal = new Sprite(new Texture("star.png"));
+        goal.setSize(1, 1);
+        goal.setPosition(58, 38);
+
+        initializeEnemies();
         
         float unitScale = 1 / 32f;
         renderer = new OrthogonalTiledMapRenderer(map, unitScale);
@@ -68,8 +74,11 @@ public class Main extends ApplicationAdapter {
 
         spriteBatch.begin();
         player.draw(spriteBatch);
-        enemy.draw(spriteBatch);
-        enemy.getVisionCone().draw(spriteBatch);
+        for(Enemy enemy : enemyList){
+            enemy.draw(spriteBatch);
+            enemy.getVisionCone().draw(spriteBatch);
+        }
+        goal.draw(spriteBatch);
         spriteBatch.end();
     }
 
@@ -78,8 +87,11 @@ public class Main extends ApplicationAdapter {
         spriteBatch.dispose();
         backgroundImage.dispose();
         mapSprite.getTexture().dispose();
-        enemy.getTexture().dispose();
-        enemy.getVisionCone().getTexture().dispose();
+        for(Enemy enemy : enemyList){
+            enemy.getTexture().dispose();
+            enemy.getVisionCone().getTexture().dispose();
+        }
+        goal.getTexture().dispose();
         player.getTexture().dispose();
     }
 
@@ -137,15 +149,53 @@ public class Main extends ApplicationAdapter {
 		camera.position.x = MathUtils.clamp(camera.position.x, effectiveViewportWidth/2f, 60-effectiveViewportWidth/2f);
 		camera.position.y = MathUtils.clamp(camera.position.y, effectiveViewportHeight/2f, 40-effectiveViewportHeight/2f);
 
-        enemy.setVisionConePosition();
+        for(Enemy enemy : enemyList){
+            enemy.move();
+            enemy.setVisionConePosition();
+        }
+
+        if(player.getBoundingRectangle().overlaps(goal.getBoundingRectangle())){
+            System.out.println("You win!");
+        }
 	}
 
-     private void draw() {
-        spriteBatch.setProjectionMatrix(camera.combined);
-        spriteBatch.begin();
-        player.draw(spriteBatch);
-        enemy.draw(spriteBatch);
-        spriteBatch.end();
+
+    private void initializeEnemies() {
+        enemyList = new ArrayList<Enemy>();
+        Enemy enemyOne = new Enemy(true);
+        enemyOne.setSize(1, 1);
+        enemyOne.setPosition(10, 18);
+        enemyList.add(enemyOne);
+
+        Enemy enemyTwo = new Enemy(true);
+        enemyTwo.setSize(1, 1);
+        enemyTwo.setPosition(30, 19);
+        enemyList.add(enemyTwo);
+
+        Enemy enemyThree = new Enemy(true);
+        enemyThree.setSize(1, 1);
+        enemyThree.setPosition(20, 28);
+        enemyList.add(enemyThree);
+
+        Enemy enemyFour = new Enemy(false);
+        enemyFour.setSize(1, 1);
+        enemyFour.setPosition(23, 14);
+        enemyList.add(enemyFour);
+
+        Enemy enemyFive = new Enemy(true);
+        enemyFive.setSize(1, 1);
+        enemyFive.setPosition(40, 2);
+        enemyList.add(enemyFive);
+
+        Enemy enemySix = new Enemy(false);
+        enemySix.setSize(1, 1);
+        enemySix.setPosition(32, 7);
+        enemyList.add(enemySix);
+
+        Enemy enemySeven = new Enemy(false);
+        enemySeven.setSize(1, 1);
+        enemySeven.setPosition(49, 38);
+        enemyList.add(enemySeven);
     }
 
 
