@@ -1,5 +1,6 @@
 package io.github.duckpocalypse;
 
+import java.lang.Math;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import com.badlogic.gdx.ApplicationAdapter;
@@ -57,7 +58,6 @@ public class Main extends ApplicationAdapter {
         );
         player = new Player();
         player.setSize(0.5f, 0.5f);
-        player.translate(0.1f,0.1f);
         enemy = new Enemy();
         enemy.setSize(0.5f, 0.5f);
         
@@ -125,47 +125,51 @@ public class Main extends ApplicationAdapter {
 			camera.zoom -= 0.02;
 		}
 		if (Gdx.input.isKeyPressed(Input.Keys.LEFT)) {
-			camera.translate(-0.3f, 0, 0);
-            player.translate(-0.3f,0);
+			camera.translate(-0.1f, 0, 0);
+            player.translate(-0.1f,0);
             if (checkCollision(player)){
-                player.translate(0.3f,0);
-                camera.translate(0.3f,0);
+                player.translate(0.1f,0);
+                camera.translate(0.1f,0);
                 System.out.println("Collision Detected!");
                 System.out.println("x " + player.getX() + "y " + player.getY());
             }
 		}
 		if (Gdx.input.isKeyPressed(Input.Keys.RIGHT)) {
-			camera.translate(0.3f, 0, 0);
-            player.translate(0.3f,0);
+			camera.translate(0.1f, 0, 0);
+            player.translate(0.1f,0);
             if (checkCollision(player)){
-                player.translate(-0.3f,0);
-                camera.translate(-0.3f,0);
+                player.translate(-0.1f,0);
+                camera.translate(-0.1f,0);
                 System.out.println("Collision Detected!");
                 System.out.println("x " + player.getX() + "y " + player.getY());
             }
 		}
 		if (Gdx.input.isKeyPressed(Input.Keys.DOWN)) {
-			camera.translate(0, -0.3f, 0);
-            player.translate(0,-0.3f);
+			camera.translate(0, -0.1f, 0);
+            player.translate(0,-0.1f);
             if (checkCollision(player)){
-                player.translate(0,0.3f);
-                camera.translate(0,0.3f);
+                player.translate(0,0.1f);
+                camera.translate(0,0.1f);
                 System.out.println("Collision Detected!");
                 System.out.println("x " + player.getX() + "y " + player.getY());
             }
 		}
 		if (Gdx.input.isKeyPressed(Input.Keys.UP)) {
-			camera.translate(0, 0.3f, 0);
-            player.translate(0,0.3f);
+			camera.translate(0, 0.1f, 0);
+            player.translate(0,0.1f);
             if (checkCollision(player)){
-                player.translate(0,-0.3f);
-                camera.translate(0,-0.3f);
+                player.translate(0,-0.1f);
+                camera.translate(0,-0.1f);
                 System.out.println("Collision Detected!");
                 System.out.println("x " + player.getX() + "y " + player.getY());
             }
 		}
+        if (Gdx.input.isKeyPressed(Input.Keys.C)) {
+            //Pressing C centers the camera on the player
+            camera.position.set(player.getX(),player.getY(),camera.zoom);
+        }
 
-		camera.zoom = MathUtils.clamp(camera.zoom, 0.1f, 100/camera.viewportWidth);
+		camera.zoom = MathUtils.clamp(camera.zoom, 0.1f, 50/camera.viewportWidth);
 
 		float effectiveViewportWidth = camera.viewportWidth * camera.zoom;
 		float effectiveViewportHeight = camera.viewportHeight * camera.zoom;
@@ -194,15 +198,11 @@ public class Main extends ApplicationAdapter {
     private boolean checkCollision(Sprite sprite) {
         Rectangle spriteRect = sprite.getBoundingRectangle();
         //spriteRect.setSize(0.1f);
-        int startX = (int) (spriteRect.getX());
-        int endX =(int) (startX + spriteRect.getWidth());
-        int startY = (int) (spriteRect.getY());
-        int endY =(int) (startY + spriteRect.getHeight());
+        int startX = (int) (spriteRect.getX() - 1);
+        int endX = (int) (startX + spriteRect.getWidth() + 2);
+        int startY = (int) (spriteRect.getY() - 1);
+        int endY = (int) (startY + spriteRect.getHeight() + 2);
         getTiles(startX, startY, endX, endY, tiles);
-        System.out.println(spriteRect.height);
-        System.out.println(spriteRect.x);
-        System.out.println(spriteRect.width);
-        System.out.println(spriteRect.y);
         for (Rectangle tile : tiles) {
             if (spriteRect.overlaps(tile)) {
                 return true;
