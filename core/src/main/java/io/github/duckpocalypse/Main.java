@@ -1,6 +1,8 @@
 package io.github.duckpocalypse;
 
 import java.lang.Math;
+import java.util.ArrayList;
+
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import com.badlogic.gdx.ApplicationAdapter;
@@ -32,12 +34,12 @@ public class Main extends ApplicationAdapter {
     private Sprite mapSprite;
     private Player player;
     private OrthographicCamera camera;
-    private VisionConeRenderer visionConeRenderer;
-    private Enemy enemy;
     private TiledMap map;
     private MapLayer collisionLayer; 
     private OrthogonalTiledMapRenderer renderer;
     private ShapeRenderer shapeRenderer;
+    private ArrayList<Enemy> enemyList;
+    private Sprite goal;
     private Pool<Rectangle> rectPool = new Pool<Rectangle>() {
 		@Override
 		protected Rectangle newObject () {
@@ -58,13 +60,15 @@ public class Main extends ApplicationAdapter {
         );
         player = new Player();
         player.setSize(0.5f, 0.5f);
-        enemy = new Enemy();
-        enemy.setSize(0.5f, 0.5f);
+
+        goal = new Sprite(new Texture("goal.png"));
+        goal.setSize(1, 1);
+        goal.setPosition(58, 38);
+
+        initializeEnemies();
         
         float unitScale = 1 / 32f;
         renderer = new OrthogonalTiledMapRenderer(map, unitScale);
-
-        visionConeRenderer = new VisionConeRenderer();
 
         float w = Gdx.graphics.getWidth();
         float h = Gdx.graphics.getHeight();
@@ -83,8 +87,8 @@ public class Main extends ApplicationAdapter {
     public void render() {
         ScreenUtils.clear(Color.WHITE);
         shapeRenderer.setProjectionMatrix(camera.combined);
-        visionConeRenderer.render(enemy);
         handleInput();
+        handleEnemies();
         camera.update();
         renderer.setView(camera);
         renderer.render();
@@ -93,9 +97,14 @@ public class Main extends ApplicationAdapter {
 
         spriteBatch.begin();
         player.draw(spriteBatch);
-        enemy.draw(spriteBatch);
+        for(Enemy enemy : enemyList){
+            enemy.draw(spriteBatch);
+            enemy.getVisionCone().draw(spriteBatch);
+        }
+        goal.draw(spriteBatch);
         spriteBatch.end();
         
+        /*
         shapeRenderer.begin(ShapeType.Line);
         Rectangle pRect = player.getBoundingRectangle();
         shapeRenderer.rect(pRect.getX(),pRect.getY(),pRect.getWidth(),pRect.getHeight());
@@ -103,6 +112,7 @@ public class Main extends ApplicationAdapter {
             shapeRenderer.rect(tileRect.getX(),tileRect.getY(),tileRect.getWidth(),tileRect.getHeight());
         }
         shapeRenderer.end();
+        */
         
 
     }
@@ -114,6 +124,10 @@ public class Main extends ApplicationAdapter {
         mapSprite.getTexture().dispose();
         map.dispose();
         player.getTexture().dispose();
+        goal.getTexture().dispose();
+        for (Enemy enemy : enemyList){
+            enemy.getTexture().dispose();
+        }
     }
 
     private void handleInput() {
@@ -130,8 +144,10 @@ public class Main extends ApplicationAdapter {
             if (checkCollision(player)){
                 player.translate(0.1f,0);
                 camera.translate(0.1f,0);
+                /*
                 System.out.println("Collision Detected!");
                 System.out.println("x " + player.getX() + "y " + player.getY());
+                */
             }
 		}
 		if (Gdx.input.isKeyPressed(Input.Keys.RIGHT)) {
@@ -140,8 +156,10 @@ public class Main extends ApplicationAdapter {
             if (checkCollision(player)){
                 player.translate(-0.1f,0);
                 camera.translate(-0.1f,0);
+                /*
                 System.out.println("Collision Detected!");
                 System.out.println("x " + player.getX() + "y " + player.getY());
+                */
             }
 		}
 		if (Gdx.input.isKeyPressed(Input.Keys.DOWN)) {
@@ -150,8 +168,10 @@ public class Main extends ApplicationAdapter {
             if (checkCollision(player)){
                 player.translate(0,0.1f);
                 camera.translate(0,0.1f);
+                /*
                 System.out.println("Collision Detected!");
                 System.out.println("x " + player.getX() + "y " + player.getY());
+                */
             }
 		}
 		if (Gdx.input.isKeyPressed(Input.Keys.UP)) {
@@ -160,8 +180,10 @@ public class Main extends ApplicationAdapter {
             if (checkCollision(player)){
                 player.translate(0,-0.1f);
                 camera.translate(0,-0.1f);
+                /*
                 System.out.println("Collision Detected!");
                 System.out.println("x " + player.getX() + "y " + player.getY());
+                */
             }
 		}
         if (Gdx.input.isKeyPressed(Input.Keys.C)) {
@@ -177,7 +199,26 @@ public class Main extends ApplicationAdapter {
 
 		camera.position.x = MathUtils.clamp(camera.position.x, effectiveViewportWidth/2f, 60-effectiveViewportWidth/2f);
 		camera.position.y = MathUtils.clamp(camera.position.y, effectiveViewportHeight/2f, 40-effectiveViewportHeight/2f);
+
+        if(player.getBoundingRectangle().overlaps(goal.getBoundingRectangle())){
+            System.out.println("You win!");
+            Gdx.app.exit();
+        }
 	}
+
+    private void handleEnemies(){
+        for(Enemy enemy : enemyList){
+            enemy.move();
+            enemy.setVisionConePosition();
+            if (checkCollision(enemy)){
+                enemy.revDirection();
+            }
+            if (enemy.checkVisionCone(player)){
+                System.out.println("You lose!");
+                Gdx.app.exit();
+            }
+        }
+    }
 
     private void getTiles (int startX, int startY, int endX, int endY, Array<Rectangle> tiles) {
 		TiledMapTileLayer layer = (TiledMapTileLayer)map.getLayers().get("Tile Layer 2");
@@ -210,6 +251,45 @@ public class Main extends ApplicationAdapter {
         }
         return false;
     }
+
+    private void initializeEnemies() {
+        enemyList = new ArrayList<Enemy>();
+        Enemy enemyOne = new Enemy(true);
+        enemyOne.setSize(1, 1);
+        enemyOne.setPosition(10, 18);
+        enemyList.add(enemyOne);
+
+        Enemy enemyTwo = new Enemy(true);
+        enemyTwo.setSize(1, 1);
+        enemyTwo.setPosition(30, 19);
+        enemyList.add(enemyTwo);
+
+        Enemy enemyThree = new Enemy(true);
+        enemyThree.setSize(1, 1);
+        enemyThree.setPosition(20, 28);
+        enemyList.add(enemyThree);
+
+        Enemy enemyFour = new Enemy(false);
+        enemyFour.setSize(1, 1);
+        enemyFour.setPosition(23, 14);
+        enemyList.add(enemyFour);
+
+        Enemy enemyFive = new Enemy(true);
+        enemyFive.setSize(1, 1);
+        enemyFive.setPosition(40, 2);
+        enemyList.add(enemyFive);
+
+        Enemy enemySix = new Enemy(false);
+        enemySix.setSize(1, 1);
+        enemySix.setPosition(32, 7);
+        enemyList.add(enemySix);
+
+        Enemy enemySeven = new Enemy(false);
+        enemySeven.setSize(1, 1);
+        enemySeven.setPosition(49, 38);
+        enemyList.add(enemySeven);
+    }
+
 
 
     
